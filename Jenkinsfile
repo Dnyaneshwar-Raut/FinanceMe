@@ -30,7 +30,7 @@ pipeline {
         }
         stage('Ansible Deploy') {
             steps {
-                sh 'ansible-playbook -i inventory.ini ansible-playbook.yml'
+                ansiblePlaybook become: true, credentialsId: 'ansible', disableHostKeyChecking: true, installation: 'ansible', inventory: '/etc/ansible/hosts', playbook: 'ansible-playbook.yml', vaultTmpPath: ''
                 echo 'Ansible deployment completed successfully.'
             }
         }
