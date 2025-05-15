@@ -30,7 +30,7 @@ pipeline {
         }
         stage('Ansible Deploy') {
             steps {
-                sh 'ansible-playbook -i /home/devops/ansible/inventory.ini ansible-playbook.yml'
+                sh 'ansible-playbook -i inventory.ini ansible-playbook.yml'
                 echo 'Ansible deployment completed successfully.'
             }
         }
