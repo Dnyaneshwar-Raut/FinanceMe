@@ -1,9 +1,10 @@
 pipeline {
     agent any
+
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'master', url: 'https://github.com/Dnyaneshwar-Raut/FinanceMe', credentialsId: 'github-creds'
+                git credentialsId: 'github-creds', url: 'https://github.com/Dnyaneshwar-Raut/FinanceMe.git'
                 echo 'Checkout completed successfully.'
             }
         }
@@ -30,13 +31,20 @@ pipeline {
         }
         stage('Ansible Deploy') {
             steps {
-                ansiblePlaybook become: true, credentialsId: 'ansible', disableHostKeyChecking: true, installation: 'ansible', inventory: '/etc/ansible/hosts', playbook: 'ansible-playbook.yml', vaultTmpPath: ''
+                ansiblePlaybook become: true, 
+                                colorized: true, 
+                                credentialsId: 'ansible_creds',   // Your SSH key credential ID
+                                disableHostKeyChecking: true, 
+                                installation: 'ansible',          // Jenkins Ansible tool name
+                                inventory: '/etc/ansible/hosts', 
+                                playbook: 'ansible-playbook.yml', 
+                                vaultTmpPath: ''
                 echo 'Ansible deployment completed successfully.'
             }
         }
     }
+    
     triggers {
         githubPush()
     }
 }
-
