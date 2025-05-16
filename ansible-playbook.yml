@@ -3,21 +3,21 @@
   become: true
   connection : ssh
   tasks : 
-  - name: updating apt
-    command : sudo apt-get update
+    - name: updating apt
+      command: sudo apt-get update
 
-  - name : Install Docker
-    command : sudo apt-get install -y docker.io
-    become : yes
-    become_user : root
+    - name: Install Docker
+      command: sudo apt-get install -y docker.io
 
-  - name : Start Docker Service
-    command : sudo systemctl start docker
-    become : yes
-    become_user : root
-  - name : stop existing containers
-    shell: docker stop $(docker ps -a -q)
-  - name : delete all containers
-    shell: docker rm $(docker ps -a -q)
-  - name: Deploy Docker Container
-    command: docker run -itd -p 8085:8081 dnyaneshwarraut/finance-me:1.0
+    - name: Start Docker Service
+      command: sudo systemctl start docker
+
+    - name: Stop container using port 8085 (if exists)
+      shell: |
+        CONTAINER_ID=$(docker ps --filter "publish=8085" --format "{{.ID}}")
+        if [ ! -z "$CONTAINER_ID" ]; then
+          docker stop $CONTAINER_ID && docker rm $CONTAINER_ID
+        fi
+
+    - name: Deploy Docker Container
+      command: docker run -itd -p 8085:8081 dnyaneshwarraut/finance-me:1.0
