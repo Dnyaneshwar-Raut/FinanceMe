@@ -1,23 +1,31 @@
-- name : Configure Docker on EC2 Instances
-  hosts : all
-  become: true
-  connection : ssh
-  tasks : 
+---
+- name: Configure Docker on EC2 Instances
+  hosts: all
+  become: yes
+
+  tasks:
     - name: updating apt
-      command: sudo apt-get update
+      apt:
+        update_cache: yes
 
     - name: Install Docker
-      command: sudo apt-get install -y docker.io
+      apt:
+        name: docker.io
+        state: present
 
     - name: Start Docker Service
-      command: sudo systemctl start docker
+      service:
+        name: docker
+        state: started
+        enabled: yes
 
-    - name: Stop container using port 8085 (if exists)
+    - name: Stop any container using port 8085
       shell: |
-        CONTAINER_ID=$(docker ps --filter "publish=8085" --format "{{.ID}}")
-        if [ ! -z "$CONTAINER_ID" ]; then
-          docker stop $CONTAINER_ID && docker rm $CONTAINER_ID
-        fi
+        docker ps -q --filter "publish=8085" | xargs -r docker stop
+
+    - name: Remove any container using port 8085
+      shell: |
+        docker ps -a -q --filter "publish=8085" | xargs -r docker rm
 
     - name: Deploy Docker Container
-      command: docker run -itd -p 8085:8081 dnyaneshwarraut/finance-me:1.0
+      shell: docker run -itd -p 8085:8081 dnyaneshwarraut/finance-me:1.0
